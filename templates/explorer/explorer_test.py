@@ -307,20 +307,21 @@ class TestExplorerTemplate(TestCase):
 
         explorer.state.set('actions', 'install', 'ok')
         explorer.state.set('actions', 'start', 'ok')
-        explorer._explorer_sal.explorer.is_running = MagicMock(return_value=True)
+        explorer._explorer_sal.is_running = MagicMock(return_value=True)
         explorer.api.services.get = MagicMock()
 
         explorer._monitor()
 
         explorer.state.check('status', 'running', 'ok')
         explorer.api.services.get.assert_not_called()
+        explorer._explorer_sal.is_running.assert_called_with()
 
     def test_monitor_not_running(self):
         explorer = Explorer(name='explorer', data=self.valid_data)
 
         explorer.state.set('actions', 'install', 'ok')
         explorer.state.set('actions', 'start', 'ok')
-        explorer._explorer_sal.explorer.is_running = MagicMock(return_value=False)
+        explorer._explorer_sal.is_running = MagicMock(return_value=False)
         container = MagicMock()
         container.delete = MagicMock()
         explorer.api.services.get = MagicMock(return_value=container)
@@ -333,6 +334,7 @@ class TestExplorerTemplate(TestCase):
         explorer._monitor()
 
         explorer.state.check('status', 'running', 'ok')
+        explorer._explorer_sal.is_running.assert_called_with()
         explorer.api.services.get.assert_called_with(template_uid='github.com/zero-os/0-templates/container/0.0.1', name=explorer._container_name)
         container.delete.assert_called_once_with()
         explorer.install.assert_called_once_with()
