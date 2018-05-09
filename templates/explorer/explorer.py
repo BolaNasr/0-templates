@@ -173,6 +173,13 @@ class Explorer(TemplateBase):
         this is done by stopping the container and respawn again with the updated flist
         """
         self.stop()
+
+        # delete and recreate the container
+        container = self.api.services.get(template_uid=CONTAINER_TEMPLATE_UID, name=self._container_name)
+        container.delete()
+        container = self._get_container()
+        container.schedule_action('install').wait(die=True)
+        
         self.start()
 
     def consensus_stat(self):
